@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  Simplest CloudFormation Template - An S3 Bucket
+
+Parameters:
+  Purpose:
+    Type: String
+    Description: What is this stack for?
+    Default: MakingMoney
+    AllowedValues:
+      - MakingMoney
+      - Demo
+
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - Key: StackPurpose
+          Value: !Ref Purpose
