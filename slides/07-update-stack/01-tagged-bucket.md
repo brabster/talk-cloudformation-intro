@@ -1,6 +1,6 @@
 ## Parameters, Refs, and Stack Updates
 
-Let's update the template to use a parameter.
+Let's tag the bucket with a purpose. We'll use a parameter to specify the value.
 
 ```yaml
 Parameters:
