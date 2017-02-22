@@ -1,0 +1,12 @@
+digraph G {
+  You -> TopStack[label="update"]
+  TopStack -> Stack1[label="update"]
+  Stack1 -> TopStack[label="done"]
+  Stack1 -> Stack2[label="update"]
+  Stack2 -> Stack1[label="done"]
+  Stack2 -> Stack3[label="update"]
+  Stack3 -> Stack2[label="done"]
+  Stack3 -> Stack4[label="update"]
+  Stack4 -> Stack3[label="done"]
+  TopStack -> You[label="done"]
+}
