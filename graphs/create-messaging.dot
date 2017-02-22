@@ -1,0 +1,12 @@
+digraph G {
+   You -> TopStack [label="create"]
+   TopStack -> FirstBucketStack [label="create"]
+   TopStack -> SecondBucketStack [label="create"]
+   FirstBucketStack -> FirstS3Bucket [label="create"]
+   SecondBucketStack -> SecondS3Bucket [label="create"]
+   FirstS3Bucket -> FirstBucketStack [label="done", style="dashed"]
+   SecondS3Bucket -> SecondBucketStack [label="done", style="dashed"]
+   FirstBucketStack -> TopStack [label="done", style="dashed"]
+   SecondBucketStack -> TopStack [label="done", style="dashed"]
+   TopStack -> You [label="done", style="dashed"]
+}
