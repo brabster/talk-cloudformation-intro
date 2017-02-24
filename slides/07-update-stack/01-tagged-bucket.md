@@ -4,7 +4,7 @@ Let's tag the bucket with a purpose. We'll use a parameter to specify the value.
 
 ```yaml
 Parameters:
-  Purpose:
+  Purpose: <---------------------- add a parameter "Purpose"
     Type: String
 
 Resources:
@@ -13,7 +13,7 @@ Resources:
     Properties:
       Tags:
         - Key: StackPurpose
-          Value: !Ref Purpose
+          Value: !Ref Purpose <--- ref the parameter
 
 ```
 

@@ -6,9 +6,9 @@ Parameters may be constrained, helping to catch invalid data earlier.
 Parameters:
   Purpose:
     Type: String
-    Description: What is this stack for?
-    Default: MakingMoney
-    AllowedValues:
+    Description: What is this stack for? <----- describe it!
+    Default: MakingMoney <-------------- set a default value
+    AllowedValues: <--------------- constrain allowed values
       - MakingMoney
       - Demo
 

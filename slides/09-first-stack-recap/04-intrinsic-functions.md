@@ -4,13 +4,13 @@ Compute values at deployment-time, like string joins
 
 ```yaml
 Resources:
-  MyS3Bucket: <------------------------- logical name of S3 bucket
+  MyS3Bucket:
     Type: AWS::S3::Bucket
 
   MyLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-     LogGroupName: !Join ["-", [!Ref MyS3Bucket, logs]] < computed
+     LogGroupName: !Join ["-", [!Ref MyS3Bucket, logs]]
 ```
 
 See also <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html" target="_blank">Split, Sub, GetAtt, etc.</a>

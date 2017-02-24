@@ -4,13 +4,13 @@ Refer to other resources
 
 ```yaml
 Resources:
-  MyS3Bucket: <------------------------ logical name of S3 bucket
+  MyS3Bucket: <------------------------ logical name
     Type: AWS::S3::Bucket
 
   MyLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-     LogGroupName: !Ref MyS3Bucket <--- name log group for S3 bucket
+     LogGroupName: !Ref MyS3Bucket <--- provisioned bucket name
 
 ```
 
