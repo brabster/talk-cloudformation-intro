@@ -1,0 +1,7 @@
+digraph G { nodesep=0.5
+  CloudFormation -> CustomPingdomPing[label="create"]
+  CloudFormation -> CustomPingdomPing[label="update"]
+  CloudFormation -> CustomPingdomPing[label="delete"]
+  CustomPingdomPing -> S3[label="result"]
+  S3 -> CloudFormation[label="result-arrived"]
+}

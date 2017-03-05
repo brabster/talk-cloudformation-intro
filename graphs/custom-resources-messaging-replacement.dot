@@ -1,0 +1,6 @@
+digraph G { nodesep=0.5
+  CloudFormation -> CustomPingdomPing[label="update; pr = #1"]
+  CustomPingdomPing -> CloudFormation[label="updated; pr = #2"]
+  CloudFormation -> CustomPingdomPing[label="delete; pr = #1"]
+  CustomPingdomPing -> CloudFormation[label="deleted; pr = #1"]
+}

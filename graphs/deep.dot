@@ -1,4 +1,4 @@
-digraph G {
+digraph G { nodesep=0.5
   You -> TopStack[label="update"]
   TopStack -> Stack1[label="update"]
   Stack1 -> TopStack[label="done"]

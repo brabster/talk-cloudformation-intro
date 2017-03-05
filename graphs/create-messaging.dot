@@ -1,4 +1,4 @@
-digraph G {
+digraph G { nodesep=0.5
    You -> TopStack [label="create"]
    TopStack -> FirstBucketStack [label="create"]
    TopStack -> SecondBucketStack [label="create"]

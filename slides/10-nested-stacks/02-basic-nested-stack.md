@@ -14,3 +14,6 @@ Resources:
     Properties:
       TemplateURL: https://s3.../01-parameterless-s3-bucket.yaml
 ```
+
+Note:
+- Template contains two nested stacks that use our prevously-defined template

@@ -1,0 +1,13 @@
+@startuml
+
+CloudFormation -> CustomPingdomPing: Update PRID#1
+CustomPingdomPing -> PingdomAPI: Create check
+PingdomAPI -> CustomPingdomPing: Created check #2
+CustomPingdomPing -> CloudFormation: Updated PRID#2
+
+CloudFormation -> CustomPingdomPing: Delete PRID#1
+CustomPingdomPing -> PingdomAPI: Delete check #1
+PingdomAPI -> CustomPingdomPing: Deleted
+CustomPingdomPing -> CloudFormation: Deleted PRID#1
+
+@enduml

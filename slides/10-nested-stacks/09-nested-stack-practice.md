@@ -8,6 +8,6 @@ Prefer wide and shallow, not narrow and deep!
 </section>
 
 Note:
-Messages will be sent in parallel for sub-resources of a single resource.
-
-Messaging pattern affect by nested stack structure, cross-references and explicit DependsOn parameters.
+- Deeply nested resources will take longer to update than shallowly nesteds
+- Messages will be sent in parallel for sub-resources of a single resource.
+- Messaging pattern affect by nested stack structure, cross-references and explicit DependsOn parameters.
