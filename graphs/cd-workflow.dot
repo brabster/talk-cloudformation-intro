@@ -1,0 +1,10 @@
+digraph G { nodesep=0.5
+  SportsbookIngestion -> Environment[label="v43"]
+  CasinoIngestion -> Environment[label="v2"]
+  DataWarehouse -> Environment[label="v665"]
+  GoogleAnalyicsGateway -> Environment[label="v4"]
+
+  Environment -> Test[label="deploy"]
+  Environment -> PreProd[label="deploy"]
+  Environment -> Prod[label="deploy CHG44950"]
+}
