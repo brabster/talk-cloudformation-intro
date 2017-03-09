@@ -1,0 +1,8 @@
+digraph G { nodesep=0.5
+  You -> NetStack[label="change"]
+  You -> DatabaseStack[label="change"]
+  You -> WebStack[label="change"]
+  DatabaseStack -> NetStack[label="ref"]
+  WebStack -> NetStack[label="ref"]
+  WebStack -> DatabaseStack[label="ref"]
+}

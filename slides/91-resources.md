@@ -9,5 +9,5 @@
 
 ### Others
 
-- [Infrastructure as Code - Keef Morris](http://infrastructure-as-code.com/)
+- [Infrastructure as Code - Kief Morris](http://infrastructure-as-code.com/)
 
