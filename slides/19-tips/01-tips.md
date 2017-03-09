@@ -1,9 +1,9 @@
 ## General Tips
 
-- Introduce CloudFormation as early a possible
+- Introduce CloudFormation as early as possible
 - Don't update CloudFormation-managed resources yourself
 - Have at least one test environment and test EVERYTHING
-- Integrate you infra code with your CI/CD pipeline
+- Integrate your infra code with your CI/CD pipeline
 - Keep infra code with the code it provisions
 - Organise your templates to group things that change together
 - Use multiple AWS accounts, one per "environment"

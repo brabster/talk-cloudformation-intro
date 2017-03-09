@@ -7,7 +7,7 @@ CloudFormation's way of reusing and composing stacks
 
 <img src="images/minibricks/r2d2.jpg" height="300">
 
-...makes R2D2
+...makes stuff you want
 
 Note:
 - or some other thing that has value!

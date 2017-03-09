@@ -1,4 +1,4 @@
-## Why do you need CloudFormation?
+## Why else do you need CloudFormation?
 
 * Microservices are the new hotness
 * Smaller services

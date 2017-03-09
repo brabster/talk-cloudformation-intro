@@ -1,4 +1,4 @@
 ## Compliance
 
-* Audit
-* Security
+* Audit your changes
+* Apply security right everywhere
