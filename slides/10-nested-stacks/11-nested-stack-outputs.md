@@ -6,12 +6,12 @@ Step 1: Define the value as an output
 
 ```yaml
 Resources:
-  EventStream: ...
+  ImageBucket: ...
 
 Outputs:
-  EventStreamArn:
-    Description: Kinesis stream of events
-    Value: !GetAtt EventStream.Arn
+  BucketName:
+    Description: User upload image bucket
+    Value: !Ref ImageBucket
 ```
 
 Note:

@@ -4,20 +4,23 @@ Export an output value from one stack
 
 ```yaml
 Outputs:
-  EventStreamArn:
-    Value: !GetAtt EventStream.Arn
+  BucketName:
+    Value: !Ref ImageBucket
     Export:
-      Name: !Sub "${AWS::StackName}-EventStreamArn"
+      Name: !Sub "${AWS::StackName}-BucketName"
 ```
 
 Import it into another with `Fn::ImportValue`
 
 ```yaml
+Parameters:
+  ImageBucketStackName:...
+
 Resources:
-  MyResource:...
-    EventStreamArn:
+  MyResource:
+    Thumbnailer
       "Fn::ImportValue":
-        !Sub "${EventStreamStackName}-EventStreamArn"
+        !Sub "${ImageBucketStackName}-BucketName"
 ```
 
 Note:

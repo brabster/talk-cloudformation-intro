@@ -15,3 +15,4 @@ Note:
   - SaaS like a Salesforce Sandbox
   - New AWS services tend to be supported by CloudFormation later, use custom resources to patch the gap
   - Your own custom infrastructure, like running database migrations during deployments
+- Custom::DatabaseMigration might be much better named Custom::DatabaseSchema

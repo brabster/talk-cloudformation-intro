@@ -1,0 +1,9 @@
+digraph G { nodesep=0.5
+  DatabaseStack -> ConnectionString[label="exports"]
+  You -> DatabaseStack[label="update"]
+  ConnectionString -> WebsiteStack[label="imported-by"]
+  WebsiteStack -> ApplicationUrl[label="export"]
+  You -> WebsiteStack[label="update"]
+  ApplicationUrl -> CustomCdn[label="imported-by"]
+  You -> CustomCdn[label="update"]
+}

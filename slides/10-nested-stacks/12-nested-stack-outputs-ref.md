@@ -6,12 +6,12 @@ Step 2: Ref the value from the parent template
 
 ```yaml
 Resources:
-  EventStack: ...
+  ImageBucketStack: ...
 
-  EventConsumer:
+  Thumbnailer:
     Type: ...
     Properties:
-      EventStreamArn: !GetAtt EventStack.Outputs.EventStreamArn
+      BucketName: !GetAtt ImageBucketStack.Outputs.BucketName
 ```
 
 Note:
