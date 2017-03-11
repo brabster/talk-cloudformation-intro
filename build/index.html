@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Prez</title>
+
+    <meta name="description" content="-- DESCRIPTION HERE --">
+    <meta name="author" content="paul">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="css/highlight/styles/zenburn.css" id="highlight-theme">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <link rel="stylesheet" href="css/custom.css">
+
+  </head>
+
+  <body>
+
+    <div class="reveal">
+      <div class="slides"><section id="hello" class="slide" data-has-notes="false">
+<h2>Infrastructure as Code</h2><p><img src="images/Crane_boom_and_Altocumulus.JPG" title="By Swandau (Own work) [CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0)], via Wikimedia Commons" height="400"></img></p>
+<h3>with AWS CloudFormation</h3>
+</section>
+
+<section id="chapter-why" class="chapter">
+<section id="why-why" class="slide" data-has-notes="true">
+<h2>Why?</h2><p>Why do <em>you</em> need something like CloudFormation?</p><aside class="notes"><ul>
+<li>With the advent of cloud services, it&#39;s easy to create <em>lots</em> of infrastructure.</li>
+<li>SBG Intl Data currently has at least 300 different resources defined as part of an environment. They need to be created correctly, securely, in the right order, handle errors during provisioning gracefully, be tidied up when an environment is deleted, etc.</li>
+</ul></aside>
+</section>
+
+<section id="why-more-infra" class="slide" data-has-notes="false">
+<h2>Why else do you need CloudFormation?</h2><ul>
+<li>Microservices are the new hotness</li>
+<li>Smaller services</li>
+<li>More, smaller infrastructure</li>
+<li>PaaS</li>
+</ul>
+</section>
+
+<section id="why-repeatability" class="slide" data-has-notes="false">
+<h2>Repeatability</h2><ul>
+<li>Consistency between dev, test, production</li>
+<li>Multi-region</li>
+<li>Reuse your work</li>
+</ul>
+</section>
+
+<section id="why-compliance" class="slide" data-has-notes="false">
+<h2>Compliance</h2><ul>
+<li>Audit your changes</li>
+<li>Apply security right everywhere</li>
+</ul>
+</section>
+
+<section id="why-hard" class="slide" data-has-notes="false">
+<h2>Automation is hard!</h2>
+</section>
+</section>
+
+<section id="chapter-declarative-imperative" class="chapter">
+<section id="declarative-imperative-decl-vs-imp" class="slide" data-has-notes="true">
+<h2>Declarative vs. Imperative</h2><p>(or why not just script it?)</p>
+<ul>
+<li>cross-references and ordering</li>
+<li>execution plans</li>
+<li>error handling</li>
+<li>modularity</li>
+<li>less cognitive load</li>
+</ul><aside class="notes"><p>Circular dependencies
+Validation</p>
+<p>Common style:
+Puppet, Terraform, Azure ARM templates, OpenStack Heat templates, Google Cloud templates.</p></aside>
+</section>
+</section>
+
+<section id="chapter-cloudformation-intro" class="chapter">
+<section id="cloudformation-intro-into" class="slide" data-has-notes="false">
+<h2>CloudFormation Templates</h2>
+</section>
+
+<section id="cloudformation-intro-anatomy" class="slide" data-has-notes="true">
+<h2>CloudFormation Templates</h2><p>Basic Structure (YAML)</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">AWSTemplateFormatVersion:</span> <span class="hljs-string">"2010-09-09"</span>
+
+<span class="hljs-attr">Description:</span>
+
+<span class="hljs-attr">Parameters:</span>
+
+<span class="hljs-attr">Resources:</span>
+
+<span class="hljs-attr">Outputs:</span>
+</code></pre><aside class="notes"><p>Also Mappings, Metadata. Useful for specific problems.</p>
+<p>Originally defined as JSON documents. YAML format introduced late last year, much more readable for demos!</p></aside>
+</section>
+
+<section id="cloudformation-intro-simple-template" class="slide" data-has-notes="true">
+<h2>The Simplest Template?</h2><p>This may be the simplest template that produces useful infrastructure!</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">AWSTemplateFormatVersion:</span> <span class="hljs-string">"2010-09-09"</span>
+
+<span class="hljs-attr">Description:</span> <span class="hljs-string">&gt;
+  Simplest CloudFormation Template - An S3 Bucket
+
+</span><span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyS3Bucket:</span>
+<span class="hljs-attr">    Type:</span> AWS::S3::Bucket
+</code></pre><aside class="notes"><p>Bucket name is not specified. Lets CloudFormation generate a suitable name.
+Avoiding custom names is a good idea. We&#39;ll come back to that later.</p></aside>
+</section>
+</section>
+
+<section id="chapter-first-stack" class="chapter">
+<section id="first-stack-choose" class="slide" data-has-notes="false">
+<h2>Provision with the AWS Console</h2><p>Save the template file locally, then create a stack with it on CloudFormation</p>
+<p><img src="images/parameterless-bucket/choose-file.png" alt="Upload a local template file"></p>
+</section>
+
+<section id="first-stack-name-stack" class="slide" data-has-notes="false">
+<h2>Provision with the AWS Console</h2><p>Give the stack to be created from this template a name.</p>
+<p><img src="images/parameterless-bucket/name-stack.png" alt="Name the stack"></p>
+</section>
+
+<section id="first-stack-review" class="slide" data-has-notes="true">
+<h2>Provision with the AWS Console</h2><p>Review settings and create the stack.</p>
+<p><img src="images/parameterless-bucket/review.png" alt="Review settings"></p><aside class="notes"><p>The local file is uploaded to S3 and the location is given here.
+It is possible to estimate the cost of the stack.</p></aside>
+</section>
+
+<section id="first-stack-stack-create-started" class="slide" data-has-notes="true">
+<h2>Provision with the AWS Console</h2><p>CloudFormation reports stack is being created. Note the stack description.</p>
+<p><img src="images/parameterless-bucket/stack-create-started.png" alt="Stack creating"></p><aside class="notes"><p>The stack description can be very useful when you have lots of stacks.</p></aside>
+</section>
+
+<section id="first-stack-s3-bucket-creating" class="slide" data-has-notes="false">
+<h2>Provision with the AWS Console</h2><p>The S3 bucket is being created</p>
+<p><img src="images/parameterless-bucket/bucket-create-started.png" alt="S3 bucket creating"></p>
+</section>
+
+<section id="first-stack-stack-created" class="slide" data-has-notes="true">
+<h2>Provision with the AWS Console</h2><p>The stack is created and an S3 bucket with a generated name exists.</p>
+<p><img src="images/parameterless-bucket/stack-created.png" alt="Stack created"></p><aside class="notes"><p>We&#39;ve switched to the resources tab now, to see the bucket name that was generated.</p></aside>
+</section>
+</section>
+
+<section id="chapter-update-stack" class="chapter">
+<section id="update-stack-tagged-bucket" class="slide" data-has-notes="true">
+<h2>Parameters, Refs, and Stack Updates</h2><p>Let&#39;s tag the bucket with a purpose. We&#39;ll use a parameter to specify the value.</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Parameters:</span>
+<span class="hljs-attr">  Purpose:</span> &lt;---------------------- add a parameter <span class="hljs-string">"Purpose"</span>
+<span class="hljs-attr">    Type:</span> String
+
+<span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyS3Bucket:</span>
+<span class="hljs-attr">    Type:</span> AWS::S3::Bucket
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">      Tags:</span>
+<span class="hljs-attr">        - Key:</span> StackPurpose
+<span class="hljs-attr">          Value:</span> !Ref Purpose &lt;--- ref the parameter
+</code></pre><aside class="notes"><p>From here, AWSTemplateFormatVersion and Description are omitted for presentation but set in the actual template.</p>
+<p>The Parameters block specifies a &quot;Purpose&quot; parameter. This must be specified at stack create or update time.</p>
+<p>The Resources block specifies a &quot;Tags&quot; property, assiging the value of the parameter to the tag &quot;StackPurpose&quot;.</p></aside>
+</section>
+
+<section id="update-stack-tagged-bucket-enh-param" class="slide" data-has-notes="true">
+<h2>Parameters, Refs, and Stack Updates</h2><p>Parameters may be constrained, helping to catch invalid data earlier.</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Parameters:</span>
+<span class="hljs-attr">  Purpose:</span>
+<span class="hljs-attr">    Type:</span> String
+<span class="hljs-attr">    Description:</span> What is this stack for? &lt;----- describe it!
+<span class="hljs-attr">    Default:</span> MakingMoney &lt;-------------- set a default value
+<span class="hljs-attr">    AllowedValues:</span> &lt;--------------- constrain allowed values
+<span class="hljs-bullet">      -</span> MakingMoney
+<span class="hljs-bullet">      -</span> Demo
+
+<span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyS3Bucket:</span>
+<span class="hljs-attr">    Type:</span> AWS::S3::Bucket
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">      Tags:</span>
+<span class="hljs-attr">        - Key:</span> StackPurpose
+<span class="hljs-attr">          Value:</span> !Ref Purpose
+</code></pre><aside class="notes"><p>Parameter constraints will alter the behaviour of the CloudFormation console.</p>
+<p>Values provided for a parameter must satisfy all constraints or the stack create/update will abort.</p>
+<p>The Default parameter property will be taken if the parameter is not explicitly set.</p></aside>
+</section>
+
+<section id="update-stack-update-option" class="slide" data-has-notes="false">
+<h2>Update Stack</h2><p>Select the existing stack and choose &quot;Update Stack&quot;</p>
+<p><img src="images/param-tag-bucket/option-update-stack.png" alt="Update a stack"></p>
+</section>
+
+<section id="update-stack-choose-new-template" class="slide" data-has-notes="true">
+<h2>Update Stack</h2><p>Select new template to update stack</p>
+<p><img src="images/param-tag-bucket/choose-new-template.png" alt="Select updated template"></p><aside class="notes"><p>Also option to update parameters without updating the template.</p></aside>
+</section>
+
+<section id="update-stack-new-parameters" class="slide" data-has-notes="true">
+<h2>Update Stack</h2><p>Set the new parameter value</p>
+<p><img src="images/param-tag-bucket/new-parameters.png" alt="Set new parameter"></p><aside class="notes"><p>Also option to update parameters without updating the template.</p></aside>
+</section>
+
+<section id="update-stack-review-changes" class="slide" data-has-notes="true">
+<h2>Update Stack</h2><p>Review the &quot;Change Set&quot; specified by your update</p>
+<p><img src="images/param-tag-bucket/review-change-set.png" alt="Review change set"></p><aside class="notes"><p>Change sets new feature mid-2016</p>
+<p>Change sets stop at nested stacks. More on that later.</p></aside>
+</section>
+
+<section id="update-stack-start-update" class="slide" data-has-notes="true">
+<h2>Update Stack</h2><p>CloudFormation begins updating the stack</p>
+<p><img src="images/param-tag-bucket/stack-update-start.png" alt="Update begins"></p>
+</section>
+
+<section id="update-stack-update-complete" class="slide" data-has-notes="true">
+<h2>Update Stack</h2><p>Update is complete... review S3 bucket tags</p>
+<p><img src="images/param-tag-bucket/s3-bucket-with-tag.png" alt="S3 bucket has new tags"></p><aside class="notes"><p>The others tags are CloudFormation-related metadata. Many CF-managed resources have visible tags like that.</p></aside>
+</section>
+</section>
+
+<section id="chapter-delete-stack" class="chapter">
+<section id="delete-stack-delete-stack-prep" class="slide" data-has-notes="true">
+<h2>Stack Deletion</h2><p>Before deleting the stack, put something in the S3 bucket.</p>
+<p><img src="images/delete-stack/upload-file-to-s3.png" alt="Object uploaded to S3"></p><aside class="notes"><p>Use the upload button.</p></aside>
+</section>
+
+<section id="delete-stack-attempt-delete" class="slide" data-has-notes="true">
+<h2>Stack Deletion</h2><p>In CloudFormation, select the stack and choose Delete Stack</p>
+<p><img src="images/delete-stack/first-delete-stack.png" alt="Delete Stack attempt"></p>
+</section>
+
+<section id="delete-stack-failed-delete" class="slide" data-has-notes="true">
+<h2>Stack Deletion</h2><p>We can&#39;t automatically delete a non-empty S3 bucket.</p>
+<p><img src="images/delete-stack/delete-failed.png" alt="Delete Stack attempt"></p><aside class="notes"><p>Continue by either emptying the bucket and deleting again, or deleting again and accepting the option to retain the bucket.</p></aside>
+</section>
+</section>
+
+<section id="chapter-first-stack-recap" class="chapter">
+<section id="first-stack-recap-cli-sdk" class="slide" data-has-notes="true">
+<h2>Alternatives to the Console</h2><h3>AWS CLI <a href="http://docs.aws.amazon.com/cli/latest/reference/cloudformation/" target="_blank">(documentation)</a></h3><pre><code class="lang-bash">aws cloudformation create-stack --stack-name demo-stack --template-url ... --parameters ...
+</code></pre>
+<h3>AWS SDKs</h3><p><a href="https://aws.amazon.com/tools/" target="_blank">12 SDKs</a> at time of writing</p>
+<h3>Integrations</h3><p>Terraform <a href="https://www.terraform.io/docs/providers/aws/r/cloudformation_stack.html" target="_blank">resource</a></p><aside class="notes"><ul>
+<li>All CloudFormation functionality available through Console, CLI and SDKs</li>
+<li>Use CLI, SDKs to integration with other tooling</li>
+<li>Existing integrations into other ecosystems like Terraform</li>
+</ul></aside>
+</section>
+
+<section id="first-stack-recap-xrefs" class="slide" data-has-notes="true">
+<h2>Cross-References</h2><p>Refer to parameters, as in tagged bucket example</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Parameters:</span>
+<span class="hljs-attr">  Purpose:</span> &lt;----------------------- parameter logical name
+<span class="hljs-attr">    Type:</span> String
+
+<span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyS3Bucket:</span>
+<span class="hljs-attr">    Type:</span> AWS::S3::Bucket
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">      Tags:</span>
+<span class="hljs-attr">        - Key:</span> StackPurpose
+<span class="hljs-attr">          Value:</span> !Ref Purpose &lt;---- cross-reference
+</code></pre><aside class="notes"><ul>
+<li>Keys in the template map referred to as &quot;logical names&quot;</li>
+<li><em>!Ref</em> takes an argument of the resource to substitute</li>
+</ul></aside>
+</section>
+
+<section id="first-stack-recap-xrefs-res" class="slide" data-has-notes="true">
+<h2>Cross-References</h2><p>Refer to other resources</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyS3Bucket:</span> &lt;------------------------ logical name
+<span class="hljs-attr">    Type:</span> AWS::S3::Bucket
+
+<span class="hljs-attr">  MyLogGroup:</span>
+<span class="hljs-attr">    Type:</span> AWS::Logs::LogGroup
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">     LogGroupName:</span> !Ref MyS3Bucket &lt;--- provisioned bucket name
+</code></pre><aside class="notes"><ul>
+<li>What is actually passed in a reference to a resource varies, check documentation</li>
+</ul></aside>
+</section>
+
+<section id="first-stack-recap-intrinsic-functions" class="slide" data-has-notes="true">
+<h2>Intrinsic Functions</h2><p>Compute values at deployment-time, like string joins</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyS3Bucket:</span>
+<span class="hljs-attr">    Type:</span> AWS::S3::Bucket
+
+<span class="hljs-attr">  MyLogGroup:</span>
+<span class="hljs-attr">    Type:</span> AWS::Logs::LogGroup
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">     LogGroupName:</span> !Join [<span class="hljs-string">"-"</span>, [!Ref MyS3Bucket, logs]]
+</code></pre>
+<p>See also <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference.html" target="_blank">Split, Sub, GetAtt, etc.</a></p><aside class="notes"><ul>
+<li>Why must the join be done at deployment-time?</li>
+<li>Functions that work with values that do not exist until the stack is being constructed.</li>
+</ul></aside>
+</section>
+
+<section id="first-stack-recap-pseudo-parameters" class="slide" data-has-notes="true">
+<h2>Pseudo-Parameters</h2><p>Values that provided by context, used with <code>!Ref</code></p>
+<pre><code class="lang-yaml">!Ref <span class="hljs-string">"AWS::Region"</span>     &lt;-- region stack is deployed in
+!Ref <span class="hljs-string">"AWS::StackName"</span>  &lt;-- name of stack being deployed
+</code></pre>
+<p>...plus <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html" target="_blank">a few others</a>.</p><aside class="notes"><ul>
+<li>Can be useful to construct ARNs or define default values</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="chapter-nested-stacks" class="chapter">
+<section id="nested-stacks-nested-stacks" class="slide" data-transition="fade-in fade-out" data-transition-speed="fast" data-has-notes="true">
+<h2>Nested Stacks</h2><p>CloudFormation&#39;s way of reusing and composing stacks</p>
+<p><img src="images/minibricks/pile.jpg" height="300"></img></p>
+<p>AWS Resources...</p><aside class="notes"><ul>
+<li>Bricks represent standard AWS resources like S3 buckets, DynamoDB tables, Elastic Beanstalk Applications.</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stacks" class="slide" data-transition="fade-in fade-out" data-transition-speed="fast" data-has-notes="true">
+<h2>Nested Stacks</h2><p>CloudFormation&#39;s way of reusing and composing stacks</p>
+<p><img src="images/minibricks/part.jpg" height="300"></img></p>
+<p>...assembled into a stack...</p><aside class="notes"><ul>
+<li>Stacks represent something higher-level and it&#39;s up to you what</li>
+<li>Examples might be a message deduplicator, a website, a customer data store</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stacks" class="slide" data-transition="fade-in fade-out" data-transition-speed="fast" data-has-notes="true">
+<h2>Nested Stacks</h2><p>CloudFormation&#39;s way of reusing and composing stacks</p>
+<p><img src="images/minibricks/r2d2.jpg" height="300"></p>
+<p>...makes stuff you want</p><aside class="notes"><ul>
+<li>or some other thing that has value!</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-basic-nested-stack" class="slide" data-has-notes="true">
+<h2>Reusing our Bucket Stack</h2><p>Our S3 stack can be nested without modification...</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  FirstBucketStack:</span>
+<span class="hljs-attr">    Type:</span> AWS::CloudFormation::Stack
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">      TemplateURL:</span> https://s3.../<span class="hljs-number">01</span>-parameterless-s3-bucket.yaml
+
+<span class="hljs-attr">  SecondBucketStack:</span>
+<span class="hljs-attr">    Type:</span> AWS::CloudFormation::Stack
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">      TemplateURL:</span> https://s3.../<span class="hljs-number">01</span>-parameterless-s3-bucket.yaml
+</code></pre><aside class="notes"><ul>
+<li>Template contains two nested stacks that use our prevously-defined template</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-basic-nested-stack-diag" class="slide" data-has-notes="true">
+<h2>Reusing our Bucket Stack</h2><p>Our S3 stack can be nested without modification...</p>
+<p><img src="images/nested-stacks/nested-stack-01.png" width="100%"></img></p><aside class="notes"><ul>
+<li>Note logical names, stack definitions</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-create-1" class="slide" data-has-notes="true">
+<h2>Creating a Nested Stack</h2><p><img src="images/nested-stacks/01-nested-stack-create-cropped.png" width="100%"></img></p><aside class="notes"><ul>
+<li>Top level stack is being created</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-create-2" class="slide" data-has-notes="true">
+<h2>Creating a Nested Stack</h2><p><img src="images/nested-stacks/02-nested-stack-create-cropped.png" width="100%"></img></p><aside class="notes"><ul>
+<li>CloudFormation sees the two nested stacks and starts creating them</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-create-3" class="slide" data-has-notes="true">
+<h2>Creating a Nested Stack</h2><p><img src="images/nested-stacks/03-nested-stack-create-cropped.png" width="100%"></img></p><aside class="notes"><ul>
+<li>The nested stacks are created, top level stack not yet updated</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-create-4" class="slide" data-has-notes="true">
+<h2>Creating a Nested Stack</h2><p><img src="images/nested-stacks/04-nested-stack-create-cropped.png" width="100%"></img></p><aside class="notes"><ul>
+<li>All resources created, top-level stack updated</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-create-wrapup" class="slide" data-has-notes="false">
+<h2>Nested Stack Usability Tip</h2><p>Generated names are prefixed with stack context</p>
+<p><img src="images/nested-stacks/final-s3-buckets.png"></img></p>
+<p><code>{stack}-{logical}-{rand}-{logical}-{rand}</code></p>
+</section>
+
+<section id="nested-stacks-nested-stack-messaging" class="slide" data-has-notes="true">
+<h2>How CloudFormation Works</h2><p>Nested stacks show how CloudFormation works</p>
+<p><img src="images/nested-stacks/create-messaging.dot.svg" alt="Create request and response messages through nested stacks"></p><aside class="notes"><ul>
+<li>Messages and responses flow asynchronously from parent to child and back again.</li>
+<li>Update-stack and delete-stack work the same way.</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-practice" class="slide" data-has-notes="true">
+<h2>Nested Stack Performance Tip</h2><p>Prefer wide and shallow, not narrow and deep!</p>
+<section>
+  <img width="400" style="vertical-align: top; margin: 1em" src="images/nested-stacks/shallow.dot.svg"/>
+  <img height="400" style="margin: 1em" src="images/nested-stacks/deep.dot.svg"/>
+</section><aside class="notes"><ul>
+<li>Deeply nested resources will take longer to update than shallowly nesteds</li>
+<li>Messages will be sent in parallel for sub-resources of a single resource.</li>
+<li>Messaging pattern affect by nested stack structure, cross-references and explicit DependsOn parameters.</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-outputs" class="slide" data-has-notes="true">
+<h2>Nested Stacks</h2><p>How to reference something in a nested stack?</p>
+<p>Step 1: Define the value as an output</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  ImageBucket:</span> ...
+
+<span class="hljs-attr">Outputs:</span>
+<span class="hljs-attr">  BucketName:</span>
+<span class="hljs-attr">    Description:</span> User upload image bucket
+<span class="hljs-attr">    Value:</span> !Ref ImageBucket
+</code></pre>
+</section>
+
+<section id="nested-stacks-nested-stack-outputs-ref" class="slide" data-has-notes="true">
+<h2>Nested Stacks</h2><p>How to reference something in a nested stack?</p>
+<p>Step 2: Ref the value from the parent template</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  ImageBucketStack:</span> ...
+
+<span class="hljs-attr">  Thumbnailer:</span>
+<span class="hljs-attr">    Type:</span> ...
+<span class="hljs-attr">    Properties:</span>
+<span class="hljs-attr">      BucketName:</span> !GetAtt ImageBucketStack.Outputs.BucketName
+</code></pre>
+</section>
+
+<section id="nested-stacks-cross-stack-refs" class="slide" data-has-notes="true">
+<h2>Cross-Stack References</h2><p>Export an output value from one stack</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Outputs:</span>
+<span class="hljs-attr">  BucketName:</span>
+<span class="hljs-attr">    Value:</span> !Ref ImageBucket
+<span class="hljs-attr">    Export:</span>
+<span class="hljs-attr">      Name:</span> !Sub <span class="hljs-string">"${AWS::StackName}-BucketName"</span>
+</code></pre>
+<p>Import it into another with <code>Fn::ImportValue</code></p>
+<pre><code class="lang-yaml"><span class="hljs-attr">Parameters:</span>
+<span class="hljs-attr">  ImageBucketStackName:</span>...
+
+<span class="hljs-attr">Resources:</span>
+<span class="hljs-attr">  MyResource:</span>
+    Thumbnailer
+      <span class="hljs-string">"Fn::ImportValue"</span>:
+        !Sub <span class="hljs-string">"${ImageBucketStackName}-BucketName"</span>
+</code></pre><aside class="notes"><ul>
+<li>Can&#39;t use !Fn syntax for sequential calls, eg. !ImportValue !Sub won&#39;t work</li>
+<li>Avoid tying stack lifecycles together</li>
+<li>Maybe easier to reason about</li>
+<li>What defines your environment?</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-cross-stack-illustration" class="slide" data-has-notes="true">
+<h2>Cross-Stack References</h2><figure>
+  <img height="400" title="Cross-Stack References and Changes" src="images/nested-stacks/cross-stack-refs-explain.dot.svg"></img>
+  <figcaption>Cross-Stack References and Changes</figcaption>
+</figure><aside class="notes"><ul>
+<li>Cross-stack exports cannot be updated when imported by another stack</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-cross-stack-vs-nested" class="slide" data-has-notes="true">
+<h2>Cross-Stack or Nested?</h2><figure style="float: left">
+  <img height="400" title="Nested Stack Change Flow" src="images/nested-stacks/nested-stacks.dot.svg"></img>
+  <figcaption>Nested Stack Workflow</figcaption>
+</figure>
+<figure style="float: right">
+  <img height="400" title="Cross-Stack References Change Flow" src="images/nested-stacks/cross-stack-refs.dot.svg"></img>
+  <figcaption>Cross-Stack Workflow</figcaption>
+</figure><aside class="notes"><ul>
+<li>Nested Stacks give you a template that controls the overall structure</li>
+<li>Cross-stack refs don&#39;t, give you freedom to define other change flows</li>
+</ul></aside>
+</section>
+
+<section id="nested-stacks-nested-stack-issues" class="slide" data-has-notes="true">
+<h2>Nested Stack Problems</h2><ul>
+<li>Opaque to:<ul>
+<li>CloudFormation Designer</li>
+<li>CloudFormation Console</li>
+<li>Change Sets</li>
+</ul>
+</li>
+<li>Unstructured parameters could be limiting</li>
+<li>No libraries or dependency management for templates</li>
+<li>Can&#39;t be packaged with the code they need</li>
+</ul><aside class="notes"><ul>
+<li>CloudFormation Designer can&#39;t &quot;drill down&quot; into Nested Stacks and doesn&#39;t reflect parameters and outputs</li>
+<li>CloudFormation UI doesn&#39;t treat Nested Stacks any differently to other stacks, no folding or dependency graphs, etc.</li>
+<li>Change Sets don&#39;t &quot;drill down&quot; into Nested Stacks, so all changes just look like &quot;modify everything&quot;</li>
+<li>Unstructured parameters - when I was thinking about a &quot;message deduplicator&quot; nested stack, I thought of a bunch of infrastructure with an AWS Lambda function that could be plugged in. The Lambda function would take different configuration depending on the usecase. Trying to create a nested stack meant that the structure of the Lambda&#39;s config had to be predetermined by the nested stack which was a problem for my case.</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="cloudformation-designer" class="slide" data-has-notes="false">
+<h2>CloudFormation Designer</h2><p>A boxes-and-arrows UI to draw or render a CloudFormation template</p>
+<p>I would show you, but it doesn&#39;t work with YAML templates.</p>
+<p>Verges on useless because of its limitations.</p>
+</section>
+
+<section id="chapter-change-sets" class="chapter">
+<section id="change-sets-change-sets-good" class="slide" data-has-notes="true">
+<h2>Change Sets</h2><p>Announced last year, see what an update will do</p>
+<p><img src="images/change-sets/change-set-good.png" alt="Change set showing adds and removes"></p>
+<p>Save the change set to be applied later. Awesome?</p><aside class="notes"><ul>
+<li>similar functionality to Terrform&#39;s explain?</li>
+</ul></aside>
+</section>
+
+<section id="change-sets-change-sets-bad" class="slide" data-has-notes="true">
+<h2>Change Sets</h2><p>Unfortunately, when you start using Nested Stacks...</p>
+<p><img src="images/change-sets/change-set-bad.png" alt="Change set showing adds and removes"></p>
+<p>...many of your changes look like this.</p><aside class="notes"><ul>
+<li>Modify all the things! Can&#39;t actually tell what&#39;s going to get changed.</li>
+<li>Should have been an incredibly useful feature!</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="chapter-custom-resources" class="chapter">
+<section id="custom-resources-custom-resources" class="slide" data-has-notes="false">
+<h2>Custom Resources</h2><p>Provision all the unsupported things!</p>
+</section>
+
+<section id="custom-resources-custom-resources-why" class="slide" data-has-notes="true">
+<h2>Custom Resources</h2><p>Provision all the unsupported things!</p>
+<p>for example...</p>
+<ul>
+<li><code>Custom::SalesforceSandbox</code></li>
+<li><code>Custom::PingdomPing</code></li>
+<li><code>Custom::SlackNotifier</code></li>
+<li><code>Custom::BleedingEdgeAwsThing</code></li>
+<li><code>Custom::DatabaseMigration</code></li>
+</ul><aside class="notes"><ul>
+<li>Use custom resources to provision things that are not natively supported by CloudFormation eg.<ul>
+<li>SaaS like a Salesforce Sandbox</li>
+<li>New AWS services tend to be supported by CloudFormation later, use custom resources to patch the gap</li>
+<li>Your own custom infrastructure, like running database migrations during deployments</li>
+</ul>
+</li>
+<li>Custom::DatabaseMigration might be much better named Custom::DatabaseSchema</li>
+</ul></aside>
+</section>
+
+<section id="custom-resources-custom-resources-how" class="slide" data-has-notes="true">
+<h2>Custom Resources</h2><p>Handle create, update and delete messages</p>
+<p><img src="images/custom-resources/custom-resources-messaging.dot.svg" alt="Custom resource messaging"></p><aside class="notes"><ul>
+<li>CloudFormation messages include a pre-signed S3 URL for the result</li>
+</ul></aside>
+</section>
+
+<section id="custom-resources-custom-resources-replacement" class="slide" data-has-notes="true">
+<h2>Custom Resources</h2><p>Updates may &quot;replace&quot; resources!</p>
+<p><img src="images/custom-resources/custom-resources-messaging-replacement.svg" alt="Custom resource messaging"></p>
+<p>Replace = create new then delete old</p><aside class="notes"><ul>
+<li>We are imagining that our Pingdom Ping cannot be modified and must be replaced<ul>
+<li>Also applies to normal resources; an update requiring a replacement will create a new resource then delete the old one</li>
+<li>Which is why custom names are a problem - often cannot create another resource with the same name!</li>
+<li>Force an effective replacement by changing the logical resource ID in the template</li>
+</ul>
+</li>
+</ul></aside>
+</section>
+
+<section id="custom-resources-custom-resources-example" class="slide" data-has-notes="true">
+<h2>Custom Resources</h2><p>Example:</p>
+<pre><code class="lang-yaml"><span class="hljs-attr">AppHealthcheck:</span>
+<span class="hljs-attr">  Type:</span> Custom::PingdomPing
+<span class="hljs-attr">  Properties:</span>
+<span class="hljs-attr">    ServiceToken:</span> !GetAtt PingdomPingCustomResource.Arn
+<span class="hljs-attr">    PingTargetUrl:</span> !GetAtt AppUrl
+</code></pre><aside class="notes"><ul>
+<li>Type may be &quot;AWS::CloudFormation::CustomResource&quot; or &quot;Custom::WhateverYouWant&quot;</li>
+<li>&quot;Custom::WhateverYouWant&quot; is a lot better in cli/sdk/console output!</li>
+<li>ServiceToken must be the ARN of an AWS Lambda function to process the CloudFormation messages</li>
+<li>Other Properties are passed to the implementing function as parameters</li>
+</ul></aside>
+</section>
+
+<section id="custom-resources-custom-resources-tips" class="slide" data-has-notes="true">
+<h2>Custom Resources</h2><p>Some tips...</p>
+<ul>
+<li>Use standard resources where you can</li>
+<li>Use libs to help write custom resources</li>
+<li>Ensure S3 access in private subnets</li>
+<li>Think about how to manage your custom resources</li>
+<li>Implement with AWS Lambda, not SNS + EC2</li>
+<li>Think idempotently and defensively</li>
+<li>Be aware of PhysicalResourceId and &quot;replacement&quot; on update</li>
+</ul><aside class="notes"><ul>
+<li>Standard AWS CloudFormation resources are battle tested - but even they sometimes have bugs!</li>
+<li>Error handling isn&#39;t the best - if you fail to write the response correctly you will be waiting a long time for a timeout</li>
+<li>If you don&#39;t provide access to S3, you&#39;ll again get a long timeout</li>
+<li>Custom Resources will need to be there before you use them, but they&#39;re not explicit dependencies</li>
+<li>SNS + EC2 is the old, hard way. AWS Lambda is relatively simple and easier to implement</li>
+<li>Assume at-least-once invocation and code accordingly</li>
+<li>Think about your error handling strategy</li>
+<li>Returning a different PhysicalResourceId on update triggers a delete of the old physical resource ID</li>
+<li>Replacement behaviour only documented in <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-sns.html">http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-sns.html</a></li>
+</ul></aside>
+</section>
+</section>
+
+<section id="chapter-errors" class="chapter">
+<section id="errors-error-handling" class="slide" data-has-notes="true">
+<h2>Error Handling</h2><p>CloudFormation will attempt to rollback on error</p>
+<p><code>Rollback Failed</code> state could occur if:</p>
+<ul>
+<li>resource were changed outside of CloudFormation</li>
+<li>IAM permissions prevent the rollback action</li>
+<li>Limits prevent rollback</li>
+<li>and many other reasons</li>
+</ul>
+<p>Rare, if disciplined!</p><aside class="notes"><ul>
+<li>See AWS documentation or AWS support if you see this</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="chapter-workflow" class="chapter">
+<section id="workflow-workflow" class="slide" data-has-notes="true">
+<h2>CloudFormation Workflow</h2><aside class="notes"><ul>
+<li>How our IaC workflow has evolved from a few shell scripts to 135 CloudFormation stacks per environment</li>
+</ul></aside>
+</section>
+
+<section id="workflow-original-workflow" class="slide" data-has-notes="true">
+<h2>Our Original Workflow</h2><ul>
+<li>One big git repository</li>
+<li>Several deployment shell scripts</li>
+</ul><aside class="notes"><ul>
+<li>We&#39;d never tried to spin up a new environment in a fresh AWS account...</li>
+</ul></aside>
+</section>
+
+<section id="workflow-current-workflow" class="slide" data-has-notes="true">
+<h2>Our Current Workflow</h2><ul>
+<li>~50 small &quot;component&quot; repos</li>
+<li>Original repo is still there</li>
+<li>CloudFormation everywhere</li>
+</ul>
+<p><img src="images/cd-workflow/cd-workflow.dot.svg" alt="Components compose into an environment template that is deployed to multiple environments on demand"></p><aside class="notes"><ul>
+<li>Breaking down original repo is a work in progress</li>
+<li>Switched to CloudFormation because I&#39;d used it before and I didn&#39;t fancy working with the shell scripts much!</li>
+<li>Turned out lots of stuff missing from the shell scripts</li>
+<li>Now running four &quot;environments&quot; across two AWS accounts, easy and pretty foolproof to spin up a new environment</li>
+<li>Deployment steps are a bit manual...</li>
+</ul></aside>
+</section>
+
+<section id="workflow-code-pipeline" class="slide" data-has-notes="true">
+<h2>The Future... CodePipeline?</h2><p>AWS CodePipeline supports CloudFormation artifacts as of Nov 2016!</p>
+<ul>
+<li>Automated pipeline through deployment &quot;stages&quot;</li>
+<li>IAM integration</li>
+<li>&quot;Release Change&quot; functionality</li>
+</ul><aside class="notes"><ul>
+<li>Only noticed this support as part of prep for this talk</li>
+<li>But looks like just what we need for a more automated and controlled deployment process!</li>
+</ul></aside>
+</section>
+
+<section id="workflow-code-pipeline-example" class="slide" data-has-notes="true">
+<h2>CodePipeline Example</h2><p><img src="images/cd-workflow/codepipeline.png" alt="Example CodePipeline pipeline"></p><aside class="notes"><ul>
+<li>Only took an hour from discovering the service to get this far, seems easy to use!</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="chapter-latest-features" class="chapter">
+<section id="latest-features-serverless-application-model" class="slide" data-has-notes="true">
+<h2>Serverless Application Model</h2><p>Simplified spec and deployment support for AWS Lambda-based applications:</p>
+<ul>
+<li>API Gateway</li>
+<li>DynamoDB</li>
+<li>Lambda Functions</li>
+<li>Event triggers</li>
+</ul>
+<p>But doesn&#39;t work as a CloudFormation Nested Stack!</p><aside class="notes"><ul>
+<li>Really helps cut down the boilerplate for supported services</li>
+</ul></aside>
+</section>
+
+<section id="latest-features-service-catalog" class="slide" data-has-notes="true">
+<h2>Service Catalog</h2><p>Create &quot;Portfolios&quot; of &quot;Products&quot;</p>
+<p>Lets you pack up CloudFormation templates so that IAM users can have push-button launch.</p>
+<p>Blog posts suggest it&#39;s aimed more at larger enterprises</p><aside class="notes"><ul>
+<li>Some interesting functionality around defining a template as a &quot;product&quot;</li>
+<li>Could maybe make good use of Export/ImportValue?</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="chapter-tips" class="chapter">
+<section id="tips-tips" class="slide" data-has-notes="true">
+<h2>General Tips</h2><ul>
+<li>Introduce CloudFormation as early as possible</li>
+<li>Don&#39;t update CloudFormation-managed resources yourself</li>
+<li>Have at least one test environment and test EVERYTHING</li>
+<li>Integrate your infra code with your CI/CD pipeline</li>
+<li>Keep infra code with the code it provisions</li>
+<li>Organise your templates to group things that change together</li>
+<li>Use multiple AWS accounts, one per &quot;environment&quot;</li>
+</ul><aside class="notes"><ul>
+<li>It&#39;s easier to get started with IaC and CloudFormation while you have less stuff to manage</li>
+<li>Many CF-managed resource properties can be safely updated, eg. DynamoDB capacity, and it&#39;s a quick way to spike something out</li>
+<li>But be disciplined, use your pipelines, don&#39;t let your config drift. Good practice is to let CF do the updates.</li>
+<li>The infrastructure code will be coupled to what it provisions. Keep them together, because they will change together.</li>
+<li>A corollary which is probably obvious - your templates are code, keep them in version control!</li>
+<li>An AWS account is the only real partitioning of AWS infrastructure, both for resources and for considerations like billing and limits. They don&#39;t cost anything, and with CloudFormation you can maintain equivalent infra across accounts.</li>
+</ul></aside>
+</section>
+
+<section id="tips-tips-2" class="slide" data-has-notes="true">
+<h2>General Tips</h2><ul>
+<li>Consider both Nested Stacks and Cross-Stack References</li>
+<li>Be aware of how CloudFormation works</li>
+<li>Use Custom Resources to provision custom things</li>
+<li>Consider Terraform and other options for non-AWS resources</li>
+</ul><aside class="notes"><ul>
+<li>Nested Stacks and Cross-Stack References have pros and cons, think about how you want to work and how you&#39;re organised</li>
+<li>Thinking about how messaging works for nested stacks and replacement updates will help you avoid delays and problems</li>
+<li>Use custom resources judiciously and carefully</li>
+<li>Particularly for non-AWS environments, other options are worth a look, either as an alternative or in a hybrid approach</li>
+</ul></aside>
+</section>
+</section>
+
+<section id="vs-terraform" class="slide" data-has-notes="true">
+<h2>CloudFormation vs. Terraform</h2><table>
+<thead>
+<tr>
+<th style="text-align:center">Feature</th>
+<th style="text-align:center">CloudFormation</th>
+<th style="text-align:center">Terraform</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Rollback on Error</td>
+<td style="text-align:center">Y</td>
+<td style="text-align:center">n</td>
+</tr>
+<tr>
+<td style="text-align:center">Cross-Provider</td>
+<td style="text-align:center">n</td>
+<td style="text-align:center">Y</td>
+</tr>
+<tr>
+<td style="text-align:center">Execution Plan</td>
+<td style="text-align:center">~</td>
+<td style="text-align:center">Y</td>
+</tr>
+<tr>
+<td style="text-align:center">Managed State</td>
+<td style="text-align:center">Y</td>
+<td style="text-align:center">n</td>
+</tr>
+<tr>
+<td style="text-align:center">IAM Integration</td>
+<td style="text-align:center">Y</td>
+<td style="text-align:center">n</td>
+</tr>
+<tr>
+<td style="text-align:center">Open Source</td>
+<td style="text-align:center">n</td>
+<td style="text-align:center">Y</td>
+</tr>
+</tbody>
+</table><aside class="notes"><ul>
+<li>Terraform may get new AWS features before CloudFormation</li>
+<li>...but may be better quality support when that feature hits CloudFormation?</li>
+<li>Cross-provider feature useful if you need it</li>
+<li>...but different Terrform templates per-provider seems to be the norm, not quite as magic as it may appear</li>
+<li>...and any use of provider-specific features would be problematic!</li>
+</ul></aside>
+</section>
+
+<section id="questions" class="slide" data-has-notes="false">
+<h2>Questions?</h2>
+</section>
+
+<section id="resources-aws" class="slide" data-has-notes="false">
+<h2>Resources</h2><h3>AWS Documentation</h3><ul>
+<li><a href="https://aws.amazon.com/cloudformation/getting-started/">AWS CloudFormation Getting Started</a></li>
+<li><a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">AWS CloudFormation User Guide</a></li>
+<li><a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/best-practices.html">AWS CloudFormation Best Practices</a></li>
+</ul>
+</section>
+
+<section id="resources-others" class="slide" data-has-notes="false">
+<h2>Other Resources</h2><ul>
+<li><a href="http://infrastructure-as-code.com/">Infrastructure as Code - Kief Morris</a></li>
+<li><a href="https://github.com/widdix/aws-cf-templates">Github widdix/aws-cf-templates at al.</a></li>
+<li>Online AWS Cert Training (eg. PluralSight, LinuxAcademy)</li>
+</ul>
+</section>
+
+<section id="credits" class="slide" data-has-notes="false">
+<h2>Thanks!</h2><ul>
+<li>Thanks for coming!</li>
+<li>Thanks to Sheffield DevOps for hosting!</li>
+<li>Cover Image credit: By Swandau (Own work) [CC BY-SA 3.0 (<a href="http://creativecommons.org/licenses/by-sa/3.0">http://creativecommons.org/licenses/by-sa/3.0</a>)], via Wikimedia Commons</li>
+</ul>
+<p><a href="https://www.skybetcareers.com/">Sky Betting and Gaming is hiring!</a></p>
+</section></div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+
+      transition: Reveal.getQueryHash().transition || 'slide', // none/fade/slide/convex/concave/zoom
+
+      // Optional reveal.js plugins
+      dependencies: [
+        //{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        //{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        //{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: 'plugin/zoom-js/zoom.js', async: true },
+        { src: 'plugin/notes/notes.js', async: true }
+      ]
+    });
+    </script>
+
+    <script src="js/dynamic-theme.js"></script><script src="js/such-notes-print.js"></script><script src="js/custom.js"></script>
+
+  </body>
+</html>
